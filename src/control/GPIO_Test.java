@@ -42,12 +42,12 @@ public static void main(String[] args) {
 	DB_Manager.createTable();
 	while(true)
 	{
-		if(gpio_Listen.isLow() && b == true) //Öfnnen
+		if(gpio_Listen.isLow() && b == true) 
 		{
-			System.out.println("Postkasten wird geöffnet.");
+			System.out.println("Postkasten wird ge�ffnet.");
 			b = false;
 			DB_Manager.insertTable(0); 
-		} else if(gpio_Listen.isHigh() && b == false) //Schließen
+		} else if(gpio_Listen.isHigh() && b == false) 
 		{
 			System.out.println("Postkasten wird geschlossen.");
 			b = true;
