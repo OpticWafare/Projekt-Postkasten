@@ -12,8 +12,8 @@ public class DB_Manager {
 	private static final String SERVER = "jdbc:mysql://";
 	private static final String PORT = "3306";
 	private static final String DB_NAME = "postkasten";
-	private static final String USERNAME = "Martin";
-	private static final String PASSWORD = "post";
+	private static final String USERNAME = "root";
+	private static final String PASSWORD = "";
 
 	private static Connection con;
 
@@ -99,4 +99,12 @@ public class DB_Manager {
 		
 	}
 	
+public static void main(String[] args) {
+	getConnection();
+	createDatabase();
+	createTable();
 }
+
+}
+
+
