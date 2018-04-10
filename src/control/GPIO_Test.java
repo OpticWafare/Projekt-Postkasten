@@ -1,4 +1,5 @@
 package control;
+
 import model.DB_Manager;
 
 import com.pi4j.io.gpio.GpioController;
@@ -21,39 +22,37 @@ import com.pi4j.io.gpio.event.GpioPinEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import com.pi4j.io.gpio.event.PinEventType;
 
-
 public class GPIO_Test {
-	
-	
+
 	static GpioController gpio_control;
 
-	
-	
-public static void main(String[] args) {
-	gpio_control = GpioFactory.getInstance();
-	
-	
-	GpioPinDigitalInput gpio_Listen = gpio_control.provisionDigitalInputPin(RaspiPin.GPIO_12,           
-            "gpio_Listen",                   
-            PinPullResistance.PULL_DOWN);
-	
-	boolean b = false;
-	DB_Manager.createDatabase();
-	DB_Manager.createTable();
-	while(true)
-	{
-		if(gpio_Listen.isLow() && b == true) 
-		{
-			System.out.println("Postkasten wird geöffnet.");
-			b = false;
-			DB_Manager.insertTable(0); 
-		} else if(gpio_Listen.isHigh() && b == false) 
-		{
-			System.out.println("Postkasten wird geschlossen.");
-			b = true;
-			DB_Manager.insertTable(1); 
-		}
+	public static void main(String[] args) {
+		System.out.println("Zustände des Postkastens werden ausgegeben!");
 		
+		gpio_control = GpioFactory.getInstance();
+
+		GpioPinDigitalInput gpio_Listen = gpio_control
+				.provisionDigitalInputPin(RaspiPin.GPIO_12, "gpio_Listen",
+						PinPullResistance.PULL_DOWN);
+
+		boolean b = false;
+		long zeit = System.currentTimeMillis();
+
+		while (true) {
+			if (System.currentTimeMillis() > zeit) {
+				if (gpio_Listen.isHigh() && b == true) // Öfnnen
+				{
+					b = false;
+					System.out.println("Postkasten wird geö¶ffnet.");
+					DB_Manager.insertTable(0);
+				} else if (gpio_Listen.isLow() && b == false) // Schließen
+				{
+					b = true;
+					System.out.println("Postkasten wird geschlossen.");
+					DB_Manager.insertTable(1);
+				}
+				zeit = System.currentTimeMillis() + 100;
+			}
+		}
 	}
-}
 }
