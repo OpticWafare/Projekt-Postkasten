@@ -1,0 +1,40 @@
+.zeile {
+
+	width: 80%;
+	height: 50px;
+	background-color: #5555DD;
+	margin-left: 10%;
+	margin-bottom: 5px;
+	opacity: 0.0;
+	
+	transition: opacity 0.5s;
+}
+
+.zeile::after {
+	clear: left;
+}
+
+.zeile_id, .zeile_datum, .zeile_zustand {
+	float: left;
+	height: 100%;
+	text-align: center;
+}
+
+.zeile_id {
+	width: 15%;
+	
+}
+
+.zeile_datum {
+	width: 50%;
+	border-left: solid 2px #555555;
+}
+
+.zeile_zustand {
+	width: 30%;
+	border-left: solid 2px #555555;
+}
+
+* {
+	font-family: 'Calibri', 'Arial';
+}

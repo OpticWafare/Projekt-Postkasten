@@ -27,7 +27,7 @@ public class GPIO_Test {
 	static GpioController gpio_control;
 
 	public static void main(String[] args) {
-		System.out.println("Zust‰nde des Postkastens werden ausgegeben!");
+		System.out.println("Zust√§nde des Postkastens werden ausgegeben!");
 		
 		gpio_control = GpioFactory.getInstance();
 
@@ -43,13 +43,25 @@ public class GPIO_Test {
 				if (gpio_Listen.isHigh() && b == true) // ÷fnnen
 				{
 					b = false;
-					System.out.println("Postkasten wird geˆ∂ffnet.");
+					System.out.println("Postkasten wird ge√∂ffnet.");
 					DB_Manager.insertTable(0);
+					try {
+						ServerNotification.sendNotification(ServerNotification.DEFAULTDEVICEKEY, true);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else if (gpio_Listen.isLow() && b == false) // Schlieﬂen
 				{
 					b = true;
 					System.out.println("Postkasten wird geschlossen.");
 					DB_Manager.insertTable(1);
+					try {
+						ServerNotification.sendNotification(ServerNotification.DEFAULTDEVICEKEY, false);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				zeit = System.currentTimeMillis() + 100;
 			}
