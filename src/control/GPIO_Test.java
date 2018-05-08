@@ -40,26 +40,24 @@ public class GPIO_Test {
 
 		while (true) {
 			if (System.currentTimeMillis() > zeit) {
-				if (gpio_Listen.isHigh() && b == true) // ÷fnnen
+				if (gpio_Listen.isHigh() && b == true) // √ñfnnen
 				{
 					b = false;
-					System.out.println("Postkasten wird ge√∂ffnet.");
+					System.out.println("Postkasten wird geˆ∂ffnet.");
 					DB_Manager.insertTable(0);
 					try {
-						ServerNotification.sendNotification(ServerNotification.DEFAULTDEVICEKEY, true);
+						ServerNotification.sendNotification(true);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				} else if (gpio_Listen.isLow() && b == false) // Schlieﬂen
+				} else if (gpio_Listen.isLow() && b == false) // Schlie√üen
 				{
 					b = true;
 					System.out.println("Postkasten wird geschlossen.");
 					DB_Manager.insertTable(1);
 					try {
-						ServerNotification.sendNotification(ServerNotification.DEFAULTDEVICEKEY, false);
+						ServerNotification.sendNotification(false);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
