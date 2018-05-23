@@ -1,6 +1,10 @@
 package control;
 
 import model.DB_Manager;
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import java.util.Properties;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
@@ -42,6 +46,34 @@ public class GPIO_Test {
 			if (System.currentTimeMillis() > zeit) {
 				if (gpio_Listen.isHigh() && b == true) // Ã–fnnen
 				{
+					String USER_NAME = "jodli0609";
+			        String PASSWORD = "jojo06091";
+			        String RECIPIENT = "jodli06092@gmail.com";
+
+			        Properties props = System.getProperties();
+
+			        String host = "smtp.gmail.com";
+
+			        props.put("mail.smtp.starttls.enable", "true");
+			        props.put("mail.smtp.host", host);
+			        props.put("mail.smtp.user", USER_NAME);
+			        props.put("mail.smtp.password", PASSWORD);
+			        props.put("mail.smtp.port", "587");
+			        props.put("mail.smtp.auth", "true");
+
+			        Session session = Session.getDefaultInstance(props);
+
+			        //Bei google --> Weniger Sichere Anwendungen zulassen!
+			        boolean x = MailUtility.sendEmail(session,host,USER_NAME,PASSWORD,RECIPIENT,
+			                "Java Mail Notification Service","Mail Test\n\n - Mit freundlichen Grüßen\nJohannes",
+			                "C:\\Users\\jodli\\Desktop\\test.docx");
+
+			        if(x){
+			            System.out.println("gesendet");
+			        }else{
+			            System.out.println("fehlgeschlagen");
+			        }
+			    }
 					b = false;
 					System.out.println("Postkasten wird geö¶ffnet.");
 					DB_Manager.insertTable(0);
