@@ -1,21 +1,25 @@
 package control;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 import model.Notification;
 import model.Notification_Body;
 import model.Notification_Outer;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.util.IOUtils;
 import com.google.gson.Gson;
 
 public class ServerNotification {
@@ -24,7 +28,13 @@ public class ServerNotification {
 	
 	public final static String[] SCOPES = new String[]
 			{"https://www.googleapis.com/auth/firebase.messaging"};
-	
+
+	/**
+	 * Notification an den Google Server senden
+	 * Dieser Sendet die Notification weiter an die benötigten Geräte
+	 * @param geoeffnet true = geöffnet ; false = geschlossen
+	 * @throws Exception
+	 */
 	public static void sendNotification(boolean geoeffnet) throws Exception
 	{
 		// Verbindung aufbauen
@@ -35,7 +45,7 @@ public class ServerNotification {
 		ArrayList<String> topics = new ArrayList<String>();
 		// Alle Benachrichtungen werden an dieses Topic gesendet:
 		topics.add(Notification.TOPIC_ALL);
-		// Notification Inhalt und Topics aufbauen (je nachdem ob Postkasten geÃ¶ffnet oder geschlossen wurde)
+		// Notification Inhalt und Topics aufbauen (je nachdem ob Postkasten geöffnet oder geschlossen wurde)
 		if(geoeffnet == true)
 		{
 			body = new Notification_Body(Notification_Body.DEFAULT_TITLE, Notification_Body.BODY_OPEN);
@@ -59,29 +69,32 @@ public class ServerNotification {
 		
 		
 		OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-		// Notification Ã¼ber die Verbindung an den Server senden
+		// Notification übber die Verbindung an den Server senden
 		wr.write(notificationGson);
-		System.out.println("JSON: " + notificationGson);
+		System.out.println("Gesendetes JSON: " + notificationGson);
 		wr.flush();
 		wr.close();
 		
 		// Antwortcode empfangen
 		int responseCode = con.getResponseCode();
-		System.out.println("Antwortcode " + responseCode);
+		System.out.println("Android Antwortcode " + responseCode);
 	
-		// Eventuell RÃ¼ckmeldungen ausgeben
+		// Eventuell Rückmeldungen ausgeben
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		
 		String inputLine;
 		StringBuffer response = new StringBuffer();
-		
+		// Rückmeldung pro Line auslesen
 		while((inputLine = in.readLine()) != null)
 		{
 			response.append(inputLine);
 		}
 		in.close();
-		// Verbindung schlieÃŸen
+		// Verbindung schließen
 		con.disconnect();
+		
+		// E-Mail senden
+		MailUtility.sendNotificationMail(geoeffnet);
 	}
 	
 	/**
@@ -92,7 +105,7 @@ public class ServerNotification {
 	private static String topicsToString(ArrayList<String> topics) {
 		String str = "";
 		for(int i = 0; i < topics.size(); i++) {
-			if(i > 0) str += " || ";
+			if(i > 0) str += " || "; // Mehrere Topics mit ODER Verknüpfen
 			str += "'"+topics.get(i)+"' in topics";
 		}
 		return str;
@@ -101,15 +114,26 @@ public class ServerNotification {
 	/**
 	 * Gibt den aktuell gÃ¼ltigen Zugriffs-Token fÃ¼r die Kommunikation mit
 	 * dem Google Messaging Server zurÃ¼ck
-	 * @return
+	 * @return Zugriffstoken
 	 * @throws IOException
 	 */
 	private static String getAccessToken() throws IOException {
+		// Google Credentials einstellen
+		InputStream inputStream = new ByteArrayInputStream(getAuthFile().getBytes(StandardCharsets.UTF_8));
 		GoogleCredential googleCredential = GoogleCredential
+				.fromStream(inputStream)
+				.createScoped(Arrays.asList(SCOPES));
+
+		/*
+		 * 		GoogleCredential googleCredential = GoogleCredential
 				.fromStream(new FileInputStream(getAuthFile()))
 				.createScoped(Arrays.asList(SCOPES));
+		 */
+
+		// Neuen Token holen (falls vorhanden)
 		googleCredential.refreshToken();
 		System.out.println("Token: " + googleCredential.getAccessToken());
+		// Token zurückgeben
 		return googleCredential.getAccessToken();
 	}
 	
@@ -125,7 +149,8 @@ public class ServerNotification {
 		con.setUseCaches(false);
 		con.setDoInput(true);
 		con.setDoOutput(true);
-		
+
+		// Mit POST senden
 		con.setRequestMethod("POST");
 		// Authentifizierung mit Zugriffs-Token
 		con.setRequestProperty("Authorization", "Bearer " + getAccessToken());
@@ -135,11 +160,19 @@ public class ServerNotification {
 	}
 	
 	/**
-	 * 
-	 * @return Pfad zur Authentifizierungs-Datei (JSON)
+	 * @return Inhalt der Authentifizierungs-Datei (JSON)
 	 */
 	private static String getAuthFile() {
-		return ServerNotification.class.getResource("/model/authorization.json").toString().replace("file:", "");
-	}
-	
+		// Authorization-Datei angeben
+		InputStream in = ServerNotification.class.getResourceAsStream("/model/authorization.json");
+		String content = "";
+		// Scanner fÃ¼r Datei erstellen
+		Scanner scan = new Scanner(in, "UTF-8").useDelimiter("\\A");
+		// Inhalt der Datei holen
+		while(scan.hasNext() == true) {
+			content += scan.next();
+		}
+		// Inhalt zurückgeben
+		return content;
+	}	
 }

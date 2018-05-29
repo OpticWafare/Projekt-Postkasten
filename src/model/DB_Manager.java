@@ -6,21 +6,40 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * Datenbankmanager zum Erstellen der Datenbank und
+ * zum Auslesen und Speichern von Daten
+ *
+ * Auf die Methoden wird statisch zugegriffen
+ */
 public class DB_Manager {
 
+	/** IP Adresse des Servers */
 	private static final String HOST = "localhost";
+	/** Prefix der URL für die Verbindung zur Datenbank */
 	private static final String SERVER = "jdbc:mysql://";
+	/** Port des DB-Servers */
 	private static final String PORT = "3306";
+	/** Name der Datenbank */
 	private static final String DB_NAME = "postkasten";
-	private static final String USERNAME = "root";
-	private static final String PASSWORD = "";
+	/** Benutzername des Datenbank-Users */
+	private static final String USERNAME = "Martin";
+	/** Passwort des Datenbank-Users */
+	private static final String PASSWORD = "Post";
 
+	/** Verbindung zur Datenbank */
 	private static Connection con;
 
+	/**
+	 * Gibt die Verbindung zur Datenbank zurück.
+	 * Falls sie nicht existiert, wird sie erstellt
+	 * @return Verbindung zur Datenbank
+	 */
 	public static Connection getConnection() {
 
 		if (con == null) {
 			try {
+				
 				con = DriverManager.getConnection(SERVER + HOST + ":" + PORT
 						+ "/" + DB_NAME + "?user=" + USERNAME + "&password="
 						+ PASSWORD);
@@ -31,7 +50,8 @@ public class DB_Manager {
 			
 		} return con;
 	}
-		
+
+	/** Datenbank erstellen, falls sie nicht existiert */
 	public static void createDatabase()
 	{
 		Statement stm = null;
@@ -54,7 +74,8 @@ public class DB_Manager {
 		}
 		
 	}
-	
+
+	/** Erstellt die Datenbanktabelle in der Postkastenänderungen gespeichert werden */
 	public static void createTable()
 	{
 		Statement stm = null;
@@ -65,19 +86,17 @@ public class DB_Manager {
 					+ "Zeitpunkt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
 					+ "Zustand TINYINT(1) NOT NULL)");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally{
 			try {
 				stm.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-
 	}
-	
+
+	/** Fängt eine Postkastenänderung in die Datenbanktabelle ein */
 	public static void insertTable(int i)
 	{
 		PreparedStatement stm = null;
@@ -98,13 +117,10 @@ public class DB_Manager {
 		}
 		
 	}
-	
-public static void main(String[] args) {
-	getConnection();
-	createDatabase();
-	createTable();
+//	public static void main(String[] args) {
+//		DB_Manager.getConnection();
+//		DB_Manager.createDatabase();
+//		DB_Manager.createTable();
+//		
+//	}
 }
-
-}
-
-
